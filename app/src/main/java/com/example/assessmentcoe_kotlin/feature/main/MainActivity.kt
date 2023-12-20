@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -90,6 +91,24 @@ fun MainScreenContent(navController: NavController) {
     var isErrorVisible by remember { mutableStateOf(false) }
     var errorText by remember { mutableStateOf("") }
 
+    fun addToLazyRowItems() {
+        if (text.text.isEmpty()) {
+            isErrorVisible = true
+            errorText = "Invoerveld is leeg!"
+        } else {
+            val cleanedLicence = text.text.replace("-", "").uppercase(Locale.ROOT)
+
+            if (!ValidationUtils.isValidFormat(cleanedLicence)) {
+                isErrorVisible = true
+                errorText = "Het ingevoerde kenteken is geen geldig Nederlands kenteken!"
+            } else {
+                lazyRowItems = lazyRowItems + cleanedLicence
+                text = TextFieldValue()
+                isErrorVisible = false
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,6 +160,11 @@ fun MainScreenContent(navController: NavController) {
                         imeAction = ImeAction.Done,
                         keyboardType = KeyboardType.Text,
                         capitalization = KeyboardCapitalization.Characters
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            addToLazyRowItems()
+                        }
                     )
                 )
             }
@@ -160,21 +184,7 @@ fun MainScreenContent(navController: NavController) {
             ) {
                 Button(
                     onClick = {
-                        if (text.text.isEmpty()) {
-                            isErrorVisible = true
-                            errorText = "Invoerveld is leeg!"
-                        } else {
-                            val cleanedLicence = text.text.replace("-", "").uppercase(Locale.ROOT)
-
-                            if (!ValidationUtils.isValidFormat(cleanedLicence)) {
-                                isErrorVisible = true
-                                errorText = "Het ingevoerde kenteken is geen geldig Nederlands kenteken!"
-                            } else {
-                                lazyRowItems = lazyRowItems + cleanedLicence
-                                text = TextFieldValue()
-                                isErrorVisible = false
-                            }
-                        }
+                        addToLazyRowItems()
                     },
                     shape = RoundedCornerShape(7.dp),
                     colors = ButtonDefaults.buttonColors(
